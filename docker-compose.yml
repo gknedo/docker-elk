@@ -2,7 +2,7 @@ version: '2'
 
 services:
   elasticsearch:
-    build: elasticsearch/
+    image: docker.elastic.co/elasticsearch/elasticsearch:5.2.2
     ports:
       - "9200:9200"
       - "9300:9300"
@@ -14,6 +14,7 @@ services:
       xpack.watcher.enabled: "false"
     networks:
       - docker_elk
+
   logstash:
     build: logstash/
     volumes:
@@ -25,12 +26,17 @@ services:
       - docker_elk
     depends_on:
       - elasticsearch
+
   kibana:
-    build: kibana/
-    volumes:
-      - ./kibana/config/:/usr/share/kibana/config
+    image: docker.elastic.co/kibana/kibana:5.2.2
     ports:
       - "5601:5601"
+    environment:
+      SERVER_NAME: "kibana"
+      SERVER_HOST: "\"0\""
+      ELASTICSEARCH_URL: "http://elasticsearch:9200"
+      XPACK_SECURITY_ENABLED: "false"
+      XPACK_MONITORING_ENABLED: "false"
     networks:
       - docker_elk
     depends_on:
